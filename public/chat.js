@@ -212,10 +212,14 @@ function OnIceCandidateFunction(event) {
 }
 
 function OnTrackFunction(event) {
-    peerVideo.srcObject = event.streams[0]
+  if (event.streams && event.streams.length > 0) {
+    peerVideo.srcObject = event.streams[0];
     peerVideo.onloadedmetadata = function(e) {
-      peerVideo.play()
-    }
+        peerVideo.play();
+    };
+} else {
+    console.error("No stream found in the event");
+}
 }
 
 function addIceCandidate(candidate){
