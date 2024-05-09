@@ -214,12 +214,21 @@ function OnIceCandidateFunction(event) {
 function OnTrackFunction(event) {
   if (event.streams && event.streams.length > 0) {
     peerVideo.srcObject = event.streams[0];
+    // Play the peer video stream only when the user interacts with the page
     peerVideo.onloadedmetadata = function(e) {
+      if (isAndroid()) {
+        // On Android, play the video when the user clicks on the page
+        document.addEventListener('click', function() {
+          peerVideo.play();
+        }, { once: true }); // Ensure the event listener is removed after being triggered once
+      } else {
+        // On other platforms, autoplay the video
         peerVideo.play();
+      }
     };
-} else {
+  } else {
     console.error("No stream found in the event");
-}
+  }
 }
 
 function addIceCandidate(candidate){
@@ -231,4 +240,8 @@ function addIceCandidate(candidate){
   .catch((error) => {
     console.error("Error adding ice candidate:", error);
   });
+}
+
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent);
 }
