@@ -60,6 +60,8 @@ socket.on('created',function(){
     video: { facingMode: 'user' }
     })
     .then((stream) => {
+  console.log('mediaDevices ')
+
       divVideoChatLobby.style = 'display:none'
       divBtnGroup.style  = 'display:flex'
       userVideo.srcObject = stream
@@ -80,6 +82,7 @@ socket.on('joined',function(){
     video: { facingMode: 'user' },
     })
     .then((stream) => {
+  console.log('mediaDevices join')
       divVideoChatLobby.style = 'display:none'
       divBtnGroup.style  = 'display:flex'
       userStream = stream
@@ -114,11 +117,13 @@ socket.on('ready',function(){
     .then((offer) => rtcPeerConnection.setLocalDescription(offer))
     .then(() => {
       socket.emit('offer', rtcPeerConnection.localDescription, roomName); 
+      console.log("sdp",  JSON.stringify(rtcPeerConnection.localDescription))
     })
     .catch(function(error) {console.log(error)})
   }
 })
 socket.on('candidate',function(candidate){
+  console.log('candidate ')
   if (rtcPeerConnection.remoteDescription === null) {
     pendingCandidates.push(candidate);
   } else {
@@ -128,24 +133,12 @@ socket.on('candidate',function(candidate){
 })
 socket.on('offer',function(offer){
   if(!creator) {
+  console.log('offer ')
     rtcPeerConnection = new RTCPeerConnection(iceServers)
     rtcPeerConnection.onicecandidate = OnIceCandidateFunction;
     rtcPeerConnection.ontrack = OnTrackFunction;
     rtcPeerConnection.setRemoteDescription(offer)
-    if (userStream && userStream.getTracks().length >= 1) {
-      userStream.getTracks().forEach(track => {
-        rtcPeerConnection.addTrack(track, userStream);
-      });
-    }
-    rtcPeerConnection.createAnswer()
-    .then((answer) => rtcPeerConnection.setLocalDescription(answer))
-    .then(() => {
-      socket.emit('answer', rtcPeerConnection.localDescription, roomName);
-    })
-    .catch(error => {
-      console.error('Error handling offer:', error);
-  }); 
-            /*.then(() => {
+            .then(() => {
                 pendingCandidates.forEach(candidate => addIceCandidate(candidate));
                 pendingCandidates = []; 
                 if (userStream && userStream.getTracks().length >= 1) {
@@ -161,10 +154,11 @@ socket.on('offer',function(offer){
             })
             .catch(error => {
                 console.error('Error handling offer:', error);
-            }); */
+            });
   }
 })
 socket.on('answer',function(answer){
+  console.log('ansewr ')
   if (rtcPeerConnection.signalingState === 'have-local-offer' ||
   rtcPeerConnection.signalingState === 'have-remote-offer') {
   rtcPeerConnection.setRemoteDescription(answer)
@@ -220,6 +214,8 @@ function OnIceCandidateFunction(event) {
 }
 
 function OnTrackFunction(event) {
+  console.log('OnTrackFunction ')
+
   if (event.streams && event.streams.length > 0) {
     // Change peerVideo.srcObject to event.streams[0]
     peerVideo.srcObject = event.streams[0];
