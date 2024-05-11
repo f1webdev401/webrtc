@@ -132,7 +132,20 @@ socket.on('offer',function(offer){
     rtcPeerConnection.onicecandidate = OnIceCandidateFunction;
     rtcPeerConnection.ontrack = OnTrackFunction;
     rtcPeerConnection.setRemoteDescription(offer)
-            .then(() => {
+    if (userStream && userStream.getTracks().length >= 1) {
+      userStream.getTracks().forEach(track => {
+        rtcPeerConnection.addTrack(track, userStream);
+      });
+    }
+    rtcPeerConnection.createAnswer()
+    .then((answer) => rtcPeerConnection.setLocalDescription(answer))
+    .then(() => {
+      socket.emit('answer', rtcPeerConnection.localDescription, roomName);
+    })
+    .catch(error => {
+      console.error('Error handling offer:', error);
+  }); 
+            /*.then(() => {
                 pendingCandidates.forEach(candidate => addIceCandidate(candidate));
                 pendingCandidates = []; 
                 if (userStream && userStream.getTracks().length >= 1) {
@@ -148,7 +161,7 @@ socket.on('offer',function(offer){
             })
             .catch(error => {
                 console.error('Error handling offer:', error);
-            });
+            }); */
   }
 })
 socket.on('answer',function(answer){
