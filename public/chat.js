@@ -57,7 +57,7 @@ socket.on('created',function(){
   creator = true
   navigator.mediaDevices.getUserMedia({
     audio: true,
-    video: {width: 1200 , height: 720},
+    video: { facingMode: 'user' }
     })
     .then((stream) => {
       divVideoChatLobby.style = 'display:none'
@@ -77,7 +77,7 @@ socket.on('joined',function(){
   creator = false
   navigator.mediaDevices.getUserMedia({
     audio: true,
-    video: {width: 1200 , height: 720},
+    video: { facingMode: 'user' },
     })
     .then((stream) => {
       divVideoChatLobby.style = 'display:none'
