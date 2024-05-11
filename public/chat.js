@@ -106,10 +106,9 @@ socket.on('ready',function(){
     rtcPeerConnection.onicecandidate = OnIceCandidateFunction;
     rtcPeerConnection.ontrack = OnTrackFunction;
     if (userStream && userStream.getTracks().length >= 1) {
-      // Add the first track from userStream (assuming it's video)
       userStream.getTracks().forEach(track => {
         rtcPeerConnection.addTrack(track, userStream);
-    });
+      });
     }
     rtcPeerConnection.createOffer()
     .then((offer) => rtcPeerConnection.setLocalDescription(offer))
@@ -135,15 +134,12 @@ socket.on('offer',function(offer){
     rtcPeerConnection.setRemoteDescription(offer)
             .then(() => {
                 pendingCandidates.forEach(candidate => addIceCandidate(candidate));
-                pendingCandidates = []; // Clear the queue
-
+                pendingCandidates = []; 
                 if (userStream && userStream.getTracks().length >= 1) {
-                  // Add the first track from userStream (assuming it's video)
                   userStream.getTracks().forEach(track => {
                     rtcPeerConnection.addTrack(track, userStream);
                 });
                 }
-
                 return rtcPeerConnection.createAnswer();
             })
             .then((answer) => rtcPeerConnection.setLocalDescription(answer))
@@ -161,7 +157,6 @@ socket.on('answer',function(answer){
   rtcPeerConnection.setRemoteDescription(answer)
       .then(() => {
           console.log('Remote description set successfully');
-          // Do further processing if needed
       })
       .catch(error => {
           console.error('Error setting remote description:', error);
@@ -213,19 +208,11 @@ function OnIceCandidateFunction(event) {
 
 function OnTrackFunction(event) {
   if (event.streams && event.streams.length > 0) {
+    // Change peerVideo.srcObject to event.streams[0]
     peerVideo.srcObject = event.streams[0];
-    // Play the peer video stream only when the user interacts with the page
-    peerVideo.onloadedmetadata = function(e) {
-      if (isAndroid()) {
-        // On Android, play the video when the user clicks on the page
-        document.addEventListener('click', function() {
-          peerVideo.play();
-        }, { once: true }); // Ensure the event listener is removed after being triggered once
-      } else {
-        // On other platforms, autoplay the video
-        peerVideo.play();
-      }
-    };
+    
+    // Play the peer video immediately
+    peerVideo.play();
   } else {
     console.error("No stream found in the event");
   }
